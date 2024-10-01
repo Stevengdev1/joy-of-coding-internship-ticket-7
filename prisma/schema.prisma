@@ -9,3 +9,13 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Tasks {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  status      String    @default("pending") // Task status, such as 'pending', 'completed'
+  createdAt   DateTime  @default(now()) // Timestamp for when the task was created
+  updatedAt   DateTime  @updatedAt // Automatically updated on everytime an update occurs.
+  dueDate     DateTime? // Optional due date for the task
+}
