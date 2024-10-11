@@ -1,10 +1,11 @@
 import React from 'react'
 import { Button } from '@radix-ui/themes';
+import Link from 'next/link';
 
-const OlderTasksPage = () => {
+const TasksPage = () => {
   return (
-    <div><Button>New Task</Button></div>
+    <div><Button><Link href='/todos/new'>New Task</Link></Button></div>
   )
 }
 
-export default OlderTasksPage
+export default TasksPage
