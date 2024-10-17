@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {                  // Define an
     const validation = createTasksSchema.safeParse(body);           // Validate the parsed body against the defined schema
 
     if (!validation.success)                                        // If validation is not successful,
-        return NextResponse.json(validation.error.errors, { status: 400 }); // Return validation errors as a JSON response with a 400 status code
+        return NextResponse.json(validation.error.format(), { status: 400 }); // Return validation errors as a JSON response with a 400 status code
 
 // Create a new task in the database using Prisma client
     const newTask = await prisma.tasks.create({                     // Create a new task record in the database
