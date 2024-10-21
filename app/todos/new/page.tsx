@@ -2,7 +2,7 @@
 
 //This is the ENTER YOUR TASK page.
 
-import { Button, TextField, Callout, Text } from "@radix-ui/themes";
+import { Button, TextField, Callout, Text, Theme } from "@radix-ui/themes";
 import SimpleMDE from "react-simplemde-editor";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
@@ -38,13 +38,14 @@ const NewTaskpage = () => {
 
   
   return (
-    <div className="max-w-xl">
+    
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-teal-300 flex flex-col items-center justify-center">
       {error && (
         <Callout.Root color="red" className="mb-5">
           <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
         )}
-
+      <Theme accentColor="teal" radius="full">
       <form
         className="space-y-3"
         onSubmit={onSubmit}
@@ -71,6 +72,7 @@ const NewTaskpage = () => {
           Submit New Task {isSubmitting && <Spinner />}
         </Button>
       </form>
+      </Theme>
     </div>
   );
 };
