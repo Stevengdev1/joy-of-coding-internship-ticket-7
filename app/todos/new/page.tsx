@@ -35,7 +35,6 @@ const NewTaskpage = () => {
       setError('An unexpected error occurred.');
     }
   })
-
   
   return (
     
