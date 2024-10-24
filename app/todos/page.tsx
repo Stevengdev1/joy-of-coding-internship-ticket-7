@@ -11,6 +11,7 @@ interface Task {                                                        // Defin
   id: number;                                                           // Task ID (number).
   title: string;                                                        // Task title (string).
   description: string;                                                  // Task description (string).
+  dueDate: string | null;                                               // Task due date
 }
 
 const TasksPage = () => {                                               // Defining the TasksPage component.
@@ -49,7 +50,13 @@ const TasksPage = () => {                                               // Defin
                                                                       // Iterate over tasks using map function & render each task as a list item.
             <li key={task.id} className="bg-white p-4 rounded-lg shadow-md">
               <h2 className="text-xl font-bold text-teal-600">{task.title}</h2> 
-              <p className="text-gray-700">{task.description}</p> 
+              <p className="text-gray-700">{task.description}</p>
+
+              {task.dueDate && (                                      // Only display due date if it exists
+                <p className="text-gray-500">
+                  Due Date: {new Date(task.dueDate).toLocaleString()} {/* Format the date */}
+                </p>
+              )} 
             </li>
           ))}
         </ul>
