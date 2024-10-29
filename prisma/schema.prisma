@@ -17,5 +17,6 @@ model Tasks {
   status      String    @default("pending") // Task status, such as 'pending', 'completed'
   createdAt   DateTime  @default(now()) // Timestamp for when the task was created
   updatedAt   DateTime  @updatedAt // Automatically updated on everytime an update occurs.
-  dueDate     DateTime? // Optional due date for the task
+  dueDate     DateTime? // Optional due date for the task.
+  category    String? // Optional category for the task.
 }
