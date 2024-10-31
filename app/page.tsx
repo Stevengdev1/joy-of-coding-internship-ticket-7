@@ -1,7 +1,7 @@
+// THIS IS THE HOME PAGE.
 /* eslint-disable @next/next/no-img-element */
 "use client"; 
 
-// This is the HOME PAGE.
 import { useRouter } from "next/navigation";
 
 export default function Home() {
