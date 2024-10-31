@@ -11,7 +11,7 @@ const NavBar = () => {
 
   const links = [
     { label: "HOME", href: "/" },
-    { label: "TASKS", href: "todos" },
+    { label: "TASKS", href: "/todos" },
   ];
 
   return (

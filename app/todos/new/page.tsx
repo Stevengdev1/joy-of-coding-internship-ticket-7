@@ -1,8 +1,7 @@
+//THIS IS THE TASK SUBMISSION PAGE.
 "use client";
 
-//THIS IS MY TASK SUBMISSION PAGE.
-
-import { Button, TextField, Callout, Text, Theme } from "@radix-ui/themes";
+import { Button, TextField, Callout, Theme } from "@radix-ui/themes";
 import SimpleMDE from "react-simplemde-editor";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
@@ -28,18 +27,29 @@ const NewTaskPage = () => {
   const onSubmit = handleSubmit(async (data) => {
     try {
       setSubmitting(true);
-      await axios.post("/api/tasks", data);
-      router.push("/todos");
-    } catch (error) {
+      setError(''); // Clear any previous error
+
+      const response = await axios.post("/api/tasks", data);
+
+      if (response.status === 201) {
+        router.push("/todos");
+      } else {
+        const errorData = response.data;
+        console.error("Error:", errorData);
+        setError(errorData?.error || "Failed to create task.");
+      }
+    } catch (error: any) {
+      console.error("Unexpected error:", error);
+      const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+      setError(errorMessage);
+    } finally {
       setSubmitting(false);
-      setError("An unexpected error occurred.");
     }
   });
 
-  // Set default value for the date-time input to the current time
   const getCurrentDateTime = () => {
     const now = new Date();
-    return now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+    return now.toISOString().slice(0, 16);
   };
 
   return (
@@ -63,15 +73,21 @@ const NewTaskPage = () => {
           />
           <ErrorMessage>{errors.description?.message}</ErrorMessage>
 
-          {/* HTML Date/Time Picker with Default Value */}
           <label className="text-white">Due Date and Time:</label>
           <input
             type="datetime-local"
             {...register("dueDate")}
             className="w-full p-2 rounded-md"
-            defaultValue={getCurrentDateTime()} // Set default to current time
+            defaultValue={getCurrentDateTime()}
           />
           <ErrorMessage>{errors.dueDate?.message}</ErrorMessage>
+
+          <label className="text-white">Category:</label>
+          <select {...register("category")} className="w-full p-2 rounded-md">
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+          </select>
+          <ErrorMessage>{errors.category?.message}</ErrorMessage>
 
           <Button disabled={isSubmitting}>
             Submit New Task {isSubmitting && <Spinner />}
@@ -83,5 +99,3 @@ const NewTaskPage = () => {
 };
 
 export default NewTaskPage;
-
-
