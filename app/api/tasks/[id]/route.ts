@@ -20,14 +20,21 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const data = await request.json(); // Extract the updated data from request body
+
+    // Destructure `dueDate` and other task fields
+    const { dueDate, ...otherData } = data;
+
+    // Convert dueDate to a Date object (ISO-8601 format expected by Prisma)
+    const formattedDueDate = dueDate ? new Date(dueDate) : null;
+
     const updatedTask = await prisma.tasks.update({
       where: { id: Number(params.id) }, // Convert id to number if it's numeric
-      data,
+      data: { ...otherData, dueDate: formattedDueDate },
     });
 
     return NextResponse.json(updatedTask);
   } catch (error) {
     console.error("Error updating task:", error);
-    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update the task" }, { status: 500 });
   }
 }

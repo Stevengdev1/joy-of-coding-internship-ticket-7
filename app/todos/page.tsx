@@ -1,4 +1,5 @@
-// THIS IS THE TASKS LISTING PAGE.
+// // THIS IS THE TASKS LISTING PAGE.
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -37,14 +38,15 @@ const TasksPage = () => {
   // Handle task update
   const handleUpdate = async (id: number, updatedTask: Partial<Task>) => {
     try {
-      await axios.put(`/api/tasks/${id}`, updatedTask);
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task))
-      );
-    } catch (error) {
-      console.error("Failed to update task:", error);
+        await axios.put(`/api/tasks/${id}`, updatedTask);
+        // Optionally refetch tasks or update state here
+    } catch (error: any) { // Specify the error type
+        console.error("Failed to update task:", error.response?.data || error.message);
     }
-  };
+};
+
+
+
 
   // Toggle edit mode
   const toggleEditMode = (id: number) => {
@@ -86,22 +88,22 @@ const TasksPage = () => {
         </Button>
       </div>
 
-    <div className="flex-col space-y-4">
-      {/* Sorting Button */}
-      <Button
-        className="bg-green-500 hover:bg-green-600 text-white"
-        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+      <div className="flex-col space-y-4">
+        {/* Sorting Button */}
+        <Button
+          className="bg-green-500 hover:bg-green-600 text-white"
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
         >
-        Sort by Date ({sortOrder === "asc" ? "Oldest" : "Newest"})
-      </Button>
+          Sort by Date ({sortOrder === "asc" ? "Oldest" : "Newest"})
+        </Button>
 
-      {/* Filtering Buttons */}
-      <div className="flex space-x-2">
-        <Button onClick={() => setCategoryFilter(null)}>All</Button>
-        <Button onClick={() => setCategoryFilter("Work")}>Work</Button>
-        <Button onClick={() => setCategoryFilter("Personal")}>Personal</Button>
+        {/* Filtering Buttons */}
+        <div className="flex space-x-2">
+          <Button onClick={() => setCategoryFilter(null)}>All</Button>
+          <Button onClick={() => setCategoryFilter("Work")}>Work</Button>
+          <Button onClick={() => setCategoryFilter("Personal")}>Personal</Button>
+        </div>
       </div>
-    </div>
 
       {filteredTasks.length === 0 ? (
         <p className="text-center text-white">No tasks available.</p>
@@ -134,18 +136,45 @@ const TasksPage = () => {
                     }
                     className="block w-full border rounded-md p-2 mb-2"
                   />
+                  <input
+                    type="datetime-local" // Date and time input
+                    value={task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""}
+                    onChange={(e) =>
+                      setTasks((prevTasks) =>
+                        prevTasks.map((t) =>
+                          t.id === task.id ? { ...t, dueDate: e.target.value } : t
+                        )
+                      )
+                    }
+                    className="block w-full border rounded-md p-2 mb-2"
+                  />
+                  <select
+                    value={task.category || ""}
+                    onChange={(e) =>
+                      setTasks((prevTasks) =>
+                        prevTasks.map((t) =>
+                          t.id === task.id ? { ...t, category: e.target.value } : t
+                        )
+                      )
+                    }
+                    className="block w-full border rounded-md p-2 mb-2"
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                  </select>
                 </>
               ) : (
                 <>
                   <h2 className="text-xl font-bold text-teal-600">{task.title}</h2>
                   <p className="text-gray-700">{task.description}</p>
+                  {task.dueDate && (
+                    <p className="text-gray-500">
+                      Due Date: {new Date(task.dueDate).toLocaleString()}
+                    </p>
+                  )}
+                  {task.category && <p className="text-gray-500">Category: {task.category}</p>}
                 </>
-              )}
-
-              {task.dueDate && (
-                <p className="text-gray-500">
-                  Due Date: {new Date(task.dueDate).toLocaleString()}
-                </p>
               )}
 
               <div className="flex space-x-2 mt-4">
@@ -156,6 +185,8 @@ const TasksPage = () => {
                       handleUpdate(task.id, {
                         title: task.title,
                         description: task.description,
+                        dueDate: task.dueDate,
+                        category: task.category,
                       });
                     }
                     toggleEditMode(task.id);
@@ -179,3 +210,5 @@ const TasksPage = () => {
 };
 
 export default TasksPage;
+
+
