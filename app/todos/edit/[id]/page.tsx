@@ -10,6 +10,7 @@ interface TaskForm {
   title: string;
   description: string;
   category: string;
+  dueDate: string; //just added this...
 }
 
 const EditTaskPage = ({ params }: { params: { id: string } }) => {
@@ -26,6 +27,7 @@ const EditTaskPage = ({ params }: { params: { id: string } }) => {
 
         setValue("title", task.title);
         setValue("description", task.description);
+        setValue("dueDate", task.dueDate); //just added this...
         setValue("category", task.category || "Work");
       } catch (error) {
         console.error("Error fetching task:", error);
@@ -66,6 +68,15 @@ const EditTaskPage = ({ params }: { params: { id: string } }) => {
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
         />
       </div>
+      {/* Just added this code below */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Due Date</label>
+        <input
+          type="date"
+          {...register("dueDate")}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+        />
+      </div>
 
       {/* Category Dropdown */}
       <div>
@@ -90,4 +101,5 @@ const EditTaskPage = ({ params }: { params: { id: string } }) => {
 };
 
 export default EditTaskPage;
+
 
