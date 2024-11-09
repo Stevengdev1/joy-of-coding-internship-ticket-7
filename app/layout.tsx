@@ -4,7 +4,8 @@ import "./theme-config.css";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Theme, ThemePanel } from "@radix-ui/themes";
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Theme } from "@radix-ui/themes";
 import NavBar from "./NavBar";
 
 const inter = Inter({
@@ -24,14 +25,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.variable}>
-        {/* <Theme accentColor="green" grayColor="gray" radius="full"> */}
-        <Theme appearance="light" accentColor="violet">
-          <NavBar />
-          <main className="p-5">{children}</main>
-        </Theme>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={inter.variable}>
+          <Theme appearance="light" accentColor="violet">
+            <NavBar />
+            <main className="p-5">
+              <SignedOut>
+                <SignInButton />
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+                {children}
+              </SignedIn>
+            </main>
+          </Theme>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
