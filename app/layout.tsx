@@ -9,9 +9,9 @@ import { Theme } from "@radix-ui/themes";
 import NavBar from "./NavBar";
 
 const inter = Inter({
-	subsets: ["latin"],
-	display: "swap",
-	variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -29,16 +29,18 @@ export default function RootLayout({
       <html lang="en">
         <body className={inter.variable}>
           <Theme appearance="light" accentColor="violet">
-            <NavBar />
-            <main className="p-5">
-              <SignedOut>
-                <SignInButton />
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-                {children}
-              </SignedIn>
-            </main>
+            <header className="flex justify-between items-center p-4">
+              <NavBar />
+              <div className="flex items-center space-x-4">
+                <SignedOut>
+                  <SignInButton />
+                </SignedOut>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+              </div>
+            </header>
+            <main className="p-5">{children}</main>
           </Theme>
         </body>
       </html>
