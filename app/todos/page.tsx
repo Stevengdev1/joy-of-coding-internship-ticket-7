@@ -2,213 +2,90 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Button } from "@radix-ui/themes";
-import Link from "next/link";
-import axios from "axios";
+import React, { useEffect, useState } from "react"; 
+import { useRouter } from "next/navigation"; 
+import { useForm } from "react-hook-form"; 
+import axios from "axios"; 
 
-interface Task {
-  id: number;
+interface TaskForm {                                                // Define form fields.
   title: string;
   description: string;
-  dueDate: string | null;
-  category?: string; // Optional category field
-  isEditing?: boolean;
+  category: string;
+  dueDate: string; 
 }
 
-const TasksPage = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-
-  // Fetch tasks when the component mounts
+const EditTaskPage = ({ params }: { params: { id: string } }) => {  // Created component accepting URL params
+  const router = useRouter();                                       // Initialize router for navigation
+  const { id } = params;                                            // Destructure `id` from params to identify the task
+  const { register, handleSubmit, setValue } = useForm<TaskForm>(); // Initialize form functions from useForm
+  const [loading, setLoading] = useState(true);                     // State to manage loading status
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTask = async () => {                                 // Function to fetch task data based on task ID
       try {
-        const response = await axios.get("/api/tasks");
-        setTasks(response.data);
+        const response = await axios.get(`/api/tasks/${id}`);       // Send GET request to retrieve task details
+        const task = response.data;                                 // Extract task data from the response
+        setValue("title", task.title);                              // Populate title field with fetched task title
+        setValue("description", task.description);                  // Populate description field with task description
+        setValue("dueDate", task.dueDate);                          // Populate dueDate field with task's due date
+        setValue("category", task.category || "Work");              // Populate category with task category, defaulting to "Work"
       } catch (error) {
-        console.error("Error fetching tasks:", error);
+        console.error("Error fetching task:", error);               // Log any errors that occur
+      } finally {
+        setLoading(false);                                          // Set loading to false after task data is loaded or fails
       }
     };
 
-    fetchTasks();
-  }, []);
-
-  // Handle task update
-  const handleUpdate = async (id: number, updatedTask: Partial<Task>) => {
+    fetchTask();                                                    // Invoke fetchTask on component mount
+  }, [id, setValue]);                                               // Only re-run fetchTask if `id` or `setValue` changes
+  const onSubmit = async (data: TaskForm) => {                      // Handle form submission with the updated task data
     try {
-        await axios.put(`/api/tasks/${id}`, updatedTask);
-        // Optionally refetch tasks or update state here
-    } catch (error: any) { // Specify the error type
-        console.error("Failed to update task:", error.response?.data || error.message);
-    }
-};
-
-
-
-
-  // Toggle edit mode
-  const toggleEditMode = (id: number) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, isEditing: !task.isEditing } : task
-      )
-    );
-  };
-
-  // Handle task deletion
-  const handleDelete = async (id: number) => {
-    try {
-      await axios.delete(`/api/tasks/${id}`);
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+      await axios.put(`/api/tasks/${id}`, data);                    // Send PUT request to update the task
+      router.push("/todos");                                        // Redirect to the task list page after successful update
     } catch (error) {
-      console.error("Failed to delete task:", error);
+      console.error("Error updating task:", error);                 // Log any errors during the update process
     }
   };
-
-  // Sorting logic by due date
-  const sortedTasks = tasks.sort((a, b) => {
-    const dateA = new Date(a.dueDate || "").getTime();
-    const dateB = new Date(b.dueDate || "").getTime();
-    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-  });
-
-  // Apply the category filter
-  const filteredTasks = sortedTasks.filter((task) =>
-    categoryFilter ? task.category === categoryFilter : true
-  );
+  if (loading) return <p>Loading...</p>;                            // Show loading text if data is still being fetched
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-teal-300 p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-white">Your Tasks</h1>
-        <Button asChild className="bg-teal-500 hover:bg-teal-600 text-white">
-          <Link href="/todos/new">New Task</Link>
-        </Button>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4"> 
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Title</label> 
+        <input
+          type="text"
+          {...register("title", { required: true })}                // Register title field with validation
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/>
       </div>
-
-      <div className="flex-col space-y-4">
-        {/* Sorting Button */}
-        <Button
-          className="bg-green-500 hover:bg-green-600 text-white"
-          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-        >
-          Sort by Date ({sortOrder === "asc" ? "Oldest" : "Newest"})
-        </Button>
-
-        {/* Filtering Buttons */}
-        <div className="flex space-x-2">
-          <Button onClick={() => setCategoryFilter(null)}>All</Button>
-          <Button onClick={() => setCategoryFilter("Work")}>Work</Button>
-          <Button onClick={() => setCategoryFilter("Personal")}>Personal</Button>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Description</label> 
+        <textarea
+          {...register("description", { required: true })}          // Register description field with validation
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/>
       </div>
-
-      {filteredTasks.length === 0 ? (
-        <p className="text-center text-white">No tasks available.</p>
-      ) : (
-        <ul className="space-y-4 max-w-xl mx-auto">
-          {filteredTasks.map((task) => (
-            <li key={task.id} className="bg-white p-4 rounded-lg shadow-md">
-              {task.isEditing ? (
-                <>
-                  <input
-                    type="text"
-                    value={task.title}
-                    onChange={(e) =>
-                      setTasks((prevTasks) =>
-                        prevTasks.map((t) =>
-                          t.id === task.id ? { ...t, title: e.target.value } : t
-                        )
-                      )
-                    }
-                    className="block w-full border rounded-md p-2 mb-2"
-                  />
-                  <textarea
-                    value={task.description}
-                    onChange={(e) =>
-                      setTasks((prevTasks) =>
-                        prevTasks.map((t) =>
-                          t.id === task.id ? { ...t, description: e.target.value } : t
-                        )
-                      )
-                    }
-                    className="block w-full border rounded-md p-2 mb-2"
-                  />
-                  <input
-                    type="datetime-local" // Date and time input
-                    value={task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ""}
-                    onChange={(e) =>
-                      setTasks((prevTasks) =>
-                        prevTasks.map((t) =>
-                          t.id === task.id ? { ...t, dueDate: e.target.value } : t
-                        )
-                      )
-                    }
-                    className="block w-full border rounded-md p-2 mb-2"
-                  />
-                  <select
-                    value={task.category || ""}
-                    onChange={(e) =>
-                      setTasks((prevTasks) =>
-                        prevTasks.map((t) =>
-                          t.id === task.id ? { ...t, category: e.target.value } : t
-                        )
-                      )
-                    }
-                    className="block w-full border rounded-md p-2 mb-2"
-                  >
-                    <option value="">Select a category</option>
-                    <option value="Work">Work</option>
-                    <option value="Personal">Personal</option>
-                  </select>
-                </>
-              ) : (
-                <>
-                  <h2 className="text-xl font-bold text-teal-600">{task.title}</h2>
-                  <p className="text-gray-700">{task.description}</p>
-                  {task.dueDate && (
-                    <p className="text-gray-500">
-                      Due Date: {new Date(task.dueDate).toLocaleString()}
-                    </p>
-                  )}
-                  {task.category && <p className="text-gray-500">Category: {task.category}</p>}
-                </>
-              )}
-
-              <div className="flex space-x-2 mt-4">
-                <Button
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
-                  onClick={() => {
-                    if (task.isEditing) {
-                      handleUpdate(task.id, {
-                        title: task.title,
-                        description: task.description,
-                        dueDate: task.dueDate,
-                        category: task.category,
-                      });
-                    }
-                    toggleEditMode(task.id);
-                  }}
-                >
-                  {task.isEditing ? "Save" : "Edit"}
-                </Button>
-                <Button
-                  className="bg-red-500 hover:bg-red-600 text-white"
-                  onClick={() => handleDelete(task.id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Due Date</label>
+        <input
+          type="date"
+          {...register("dueDate")}                                  // Register due date field (optional)
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"/>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Category</label> 
+        <select
+          {...register("category")}                                 // Register category field
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" >
+          <option value="Work">Work</option> 
+          <option value="Personal">Personal</option> 
+        </select>
+      </div>
+      <button
+        type="submit"
+        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+        Update Task
+      </button>
+    </form>
   );
 };
 
-export default TasksPage;
-
+export default EditTaskPage; 
 
