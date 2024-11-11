@@ -31,3 +31,4 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: "Failed to update the task" }, { status: 500 });    // Return error message with status 500
   }
 }
+
