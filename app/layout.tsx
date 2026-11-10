@@ -1,4 +1,3 @@
-import "./merged-styles.css"; 
 import "@radix-ui/themes/styles.css";
 import "./theme-config.css";
 import "./globals.css";
