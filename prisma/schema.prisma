@@ -13,7 +13,7 @@ datasource db {
 model Tasks {
   id          Int       @id @default(autoincrement())
   title       String
-  description String?
+  description String?   @db.Text
   createdAt   DateTime  @default(now()) // Timestamp for when the task was created
   updatedAt   DateTime  @updatedAt // Automatically updated on everytime an update occurs.
   dueDate     DateTime? // Optional due date for the task.
